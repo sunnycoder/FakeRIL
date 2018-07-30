@@ -16,11 +16,13 @@ public class FakeRILReceiver implements Runnable {
     Parcel p;
     int type;
     FakeRILResponse fakeRILResponse;
+    long delay_time;
 
-    FakeRILReceiver(FakeRIL fakeRIL, Parcel p, int type) {
+    FakeRILReceiver(FakeRIL fakeRIL, Parcel p, int type, long delay_time) {
         this.fakeRIL = fakeRIL;
         this.p = p;
         this.type = type;
+        this.delay_time = delay_time;
         fakeRILResponse = new FakeRILResponse();
     }
 
@@ -29,9 +31,9 @@ public class FakeRILReceiver implements Runnable {
      */
     @Override
     public void run() {
-        Log.d(LOG_TAG, " run -->  start");
+        Log.d(LOG_TAG, " run -->  start delay: " + delay_time);
         try {
-            Thread.sleep(10000);
+            Thread.sleep(delay_time);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

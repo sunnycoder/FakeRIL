@@ -37,6 +37,8 @@ public class FakeRIL {
     Thread mReceiverThread; // 接收线程
     HandlerThread mSenderThread; // 发送线程
 
+    int count = 0;
+
     private FakeRIL() {
         mFakeRILRequest = new FakeRILRequest();
 
@@ -148,7 +150,31 @@ public class FakeRIL {
         Log.d(TAG, "getCurrentCalls ---> ");
         FakeRILRequest rr = mFakeRILRequest.obtain(FakeRILConstants.RIL_REQUEST_GET_CURRENT_CALLS, result);
 
-        send(rr);
+        send(rr); 
+    }
+
+
+    /**
+    * 通过count控制每次不同的上报，用于测试多种上报的交互
+    */
+    private void setData() {
+        count ++;
+        if (count == 1) {
+        // part1
+        Parcel p1 = FakeDataSource.getInstance().getThirdCallListParcelPart1();
+
+        startRILReceiver(p1, RESPONSE_SOLICITED, 5000);
+        } else if (count == 2) {
+        // part2
+        Parcel p2 = FakeDataSource.getInstance().getThirdCallListParcelPart2();
+
+        startRILReceiver(p2, RESPONSE_SOLICITED,1000);
+        } else {
+        // part3
+        Parcel p3 = FakeDataSource.getInstance().getThirdCallListParcelPart3();
+
+        startRILReceiver(p3, RESPONSE_SOLICITED, 1000);
+        }
     }
 
 }

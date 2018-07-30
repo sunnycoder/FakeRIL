@@ -96,5 +96,6 @@ FakeRIL.getInstance().startRILReceiver(p, FakeRIL.RESPONSE_UNSOLICITED);
     2. 同时处理多个请求
     3. 如何能让配置更加简化
     4. 更新基于8.0的版本
+    5. 处理多条CLCC上报 【DONE】 通过FakeRIL中的count控制每次不同的模拟上报数据可以解决
 
 ## 关于Parcel
