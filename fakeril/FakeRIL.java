@@ -102,9 +102,9 @@ public class FakeRIL {
      * @param p  封装好的的序列化的数据
      * @param type 响应的类型 RESPONSE_SOLICITED / RESPONSE_UNSOLICITED
      * */
-    public void startRILReceiver(Parcel p, int type) {
+    public void startRILReceiver(Parcel p, int type, long delay_time) {
         Log.d(TAG, "startRILReceiver ---> type: " + type);
-        mFakeRILReceiver = new FakeRILReceiver(this, p, type);
+        mFakeRILReceiver = new FakeRILReceiver(this, p, type, delay_time);
         mReceiverThread = new Thread(mFakeRILReceiver, "FakeRILReceiver");
         mReceiverThread.start();
 

@@ -33,17 +33,19 @@ FakeRIL设计为单例模式，支持模拟RIL的两种消息处理方法
 这里以getCurrentCalls说明
 ```
 Message mLastRelevantPoll = obtainMessage(EVENT_POLL_CALLS_RESULT);
-// mCi.getCurrentCalls(mLastRelevantPoll); // 注释原生走RIL的流程 注意需要将所有的入口都注释掉
+// 注释原生走RIL的流程 注意需要将所有的入口都注释掉 getCurrentCalls的入口在GsmCallTracker和CallTracker中
+// mCi.getCurrentCalls(mLastRelevantPoll); 
 // 调用FakeRIL的自定义请求接口
 FakeRIL.getInstance().getCurrentCalls(mLastRelevantPoll);
 
-// 获取数据
+
+// 获取数据 在FakeRIL的getCurrentCalls方法加上下面的代码，用于获取模拟数据和返回消息响应
 需要自定义获取数据的方法，根据实际情况，对数据进行封装，最终封装为Parcel类型
 Parcel p = FakeDataSource.getInstance().getActiveCall(); // 这里的FakeDataSource方法需要大家自己实现
 
 // 模拟消息回调
 
-FakeRIL.getInstance().startRILReceiver(p, FakeRIL.RESPONSE_SOLICITED);
+FakeRIL.getInstance().startRILReceiver(p, FakeRIL.RESPONSE_SOLICITED, 1000);
 
 // 最终的消息处理见FakeRILResponse中的responseGetCallState方法，实际使用时需要定义自己的数据处理方法
 ```
@@ -57,15 +59,16 @@ FakeRIL.getInstance().startRILReceiver(p, FakeRIL.RESPONSE_SOLICITED);
     5. 最终完成消息的主动上报
 
 ```
-// 注册消息监听
+// 注册消息监听 一般是在对应的CallTracker初始化的地方，例如GsmCallTracker
 FakeRIL.getInstance().registerForCallStateChanged(this, EVENT_CALL_STATE_CHANGE, null);
 
-// 获取模拟数据 注意这里的Parcel的第一位需要为消息的编号，例如这里为 RIL_UNSOL_RESPONSE_CALL_STATE_CHANGED
+在注册的时候获取模拟数据，同时启动FakeRILReceiver，例如在registerForCallStateChanged时
 
+// 获取模拟数据 注意这里的Parcel的第一位需要为消息的编号，例如这里为 RIL_UNSOL_RESPONSE_CALL_STATE_CHANGED
 Parcel p = FakeDataSource.getInstance().getIncomingCall();
 
-// 模拟消息上报
-FakeRIL.getInstance().startRILReceiver(p, FakeRIL.RESPONSE_UNSOLICITED);
+// 模拟消息上报 可以自己控制延迟时间
+FakeRIL.getInstance().startRILReceiver(p, FakeRIL.RESPONSE_UNSOLICITED， 20000);
 
 // 同样，最终的消息处理见FakeRILResponse中的responseGetCallState方法，实际使用时需要定义自己的数据处理方法
 
@@ -88,12 +91,17 @@ FakeRIL.getInstance().startRILReceiver(p, FakeRIL.RESPONSE_UNSOLICITED);
 
 2. 拦截原有的RIL流程，替换为FakeRIL流程，具体的流程参考上面的设计说明中的两种消息场景的使用说明
 
+## 目前支持的功能
+
+1. 模拟单条或者多条数据主动上报
+2. 模拟单条数据请求和返回 暂不支持多条请求和返回
+
 ## TODO
 
    目前功能还比较简单，之后需要优化的几点：
 
     1. 更简单的自定义数据
-    2. 同时处理多个请求
+    2. 同时处理多个请求和返回
     3. 如何能让配置更加简化
     4. 更新基于8.0的版本
     5. 处理多条CLCC上报 【DONE】 通过FakeRIL中的count控制每次不同的模拟上报数据可以解决
